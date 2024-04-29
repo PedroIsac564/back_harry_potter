@@ -37,24 +37,25 @@ app.get('/bruxos', async (req, res) => {
 
 app.post('/bruxos', async (req, res) => {
     try {
-        const { nome, idade, habilidade, patrono } = req.body;
+        const { nome, idade, casaHogwarts, habilidade, patrono, sangue } = req.body;
+
 
         if (idade < 11 || idade > 100) {
             return res.status(400).send('A idade deve estar entre 11 e 100 anos.');
         }
 
-        const casaHogwarts = ['Grifinória', 'Sonserina', 'Corvinal', 'Lufa-Lufa'];
-        if (!casaHogwarts) {
-            return res.status(400).send('A casa de Hogwarts é inválida.');
+        let casasValidas = ['Grifinória', 'Sonserina', 'Corvinal', 'Lufa-Lufa'];
+        if (!casasValidas.includes(casaHogwarts)) {
+            return res.status(400).send('A casa de Hogwarts fornecida não é válida.');
         }
 
-        if (!patrono || patrono.trim() === '') {
-            return res.status(400).send('É necessário ter um patrono.');
+        if (!patrono) {
+            return res.status(400).send('Um bruxo deve ter um patrono.');
         }
 
-        const sangue = ['Puro', 'Mestiço', 'Trouxa'];
-        if (!sangue) {
-            return res.status(400).send('O tipo de sangue deve ser puro, mestiço ou trouxa.');
+        let tiposSangueValidos = ['puro', 'mestiço', 'trouxa'];
+        if (!tiposSangueValidos.includes(sangue)) {
+            return res.status(400).send('O tipo de sangue fornecido não é válido.');
         }
 
         await pool.query('INSERT INTO bruxos (nome, idade, casaHogwarts, habilidade, patrono, sangue) VALUES ($1, $2, $3, $4, $5, $6)',
@@ -66,6 +67,9 @@ app.post('/bruxos', async (req, res) => {
         res.status(500).send('Erro ao criar o Bruxo');
     }
 });
+
+
+
 app.put('/bruxos/:id', async (req, res) => {
     try {
         const { id } = req.params;
