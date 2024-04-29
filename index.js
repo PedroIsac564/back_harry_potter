@@ -8,7 +8,7 @@ const pool = new Pool
     ({
         user: 'postgres',
         host: 'localhost',
-        database: 'backexercicio',
+        database: 'backharrypotter',
         password: 'ds564',
         port: 7007,
     });
@@ -21,110 +21,141 @@ app.get('/', (req, res) => {
     res.send('A rota está funcionando!');
 });
 
-function calcularIdade(dataNascimento) {
-    const hoje = new Date();
-    const nascimento = new Date(dataNascimento);
-    let idade = hoje.getFullYear() - nascimento.getFullYear();
-    const mes = hoje.getMonth() - nascimento.getMonth();
-    const dia = hoje.getDate() - nascimento.getDate();
-    if (mes < 0 || (mes === 0 && dia < 0)) {
-        idade--;
-    }
-
-    return idade;
-};
-
-function calcularSigno(mesNascimento, diaNascimento) {
-    let signo = '';
-    if ((mesNascimento == 1 && diaNascimento >= 20) || (mesNascimento == 2 && diaNascimento <= 18)) signo = 'Aquário';
-    else if ((mesNascimento == 2 && diaNascimento >= 19) || (mesNascimento == 3 && diaNascimento <= 20)) signo = 'Peixes';
-    else if ((mesNascimento == 3 && diaNascimento >= 21) || (mesNascimento == 4 && diaNascimento <= 19)) signo = 'Áries';
-    else if ((mesNascimento == 4 && diaNascimento >= 20) || (mesNascimento == 5 && diaNascimento <= 20)) signo = 'Touro';
-    else if ((mesNascimento == 5 && diaNascimento >= 21) || (mesNascimento == 6 && diaNascimento <= 20)) signo = 'Gêmeos';
-    else if ((mesNascimento == 6 && diaNascimento >= 21) || (mesNascimento == 7 && diaNascimento <= 22)) signo = 'Câncer';
-    else if ((mesNascimento == 7 && diaNascimento >= 23) || (mesNascimento == 8 && diaNascimento <= 22)) signo = 'Leão';
-    else if ((mesNascimento == 8 && diaNascimento >= 23) || (mesNascimento == 9 && diaNascimento <= 22)) signo = 'Virgem';
-    else if ((mesNascimento == 9 && diaNascimento >= 23) || (mesNascimento == 10 && diaNascimento <= 22)) signo = 'Libra';
-    else if ((mesNascimento == 10 && diaNascimento >= 23) || (mesNascimento == 11 && diaNascimento <= 21)) signo = 'Escorpião';
-    else if ((mesNascimento == 11 && diaNascimento >= 22) || (mesNascimento == 12 && diaNascimento <= 21)) signo = 'Sagitário';
-    else signo = 'Capricórnio';
-
-    return signo;
-};
-
-app.get('/usuarios', async (req, res) => {
+//Bruxos 
+app.get('/bruxos', async (req, res) => {
     try {
-        const resultado = await pool.query('SELECT * FROM usuarios');
+        const resultado = await pool.query('SELECT * FROM bruxos');
         res.json({
             total: resultado.rowCount,
-            usuarios: resultado.rows,
+            bruxo: resultado.rows,
         })
     } catch (error) {
-        console.error('Erro ao obter todos os usuarios', error);
-        res.status(500).send('Erro ao obter os usuarios');
+        console.error('Erro ao obter todos os bruxos', error);
+        res.status(500).send('Erro ao obter os bruxos');
     }
 });
 
-app.post('/usuarios', async (req, res) => {
+app.post('/bruxos', async (req, res) => {
     try {
-        const { nome, sobrenome, datanascimento, email } = req.body;
-        const dataNascimento = new Date(datanascimento);
+        const { nome, idade, casaHogwarts, habilidade, patrono, sangue } = req.body;
 
-        const idade = calcularIdade(dataNascimento);
-        const signo = calcularSigno(dataNascimento.getMonth() + 1, dataNascimento.getDate());
+        await pool.query('INSERT INTO bruxos (nome, idade, casaHogwarts, habilidade, patrono, sangue) VALUES ($1, $2, $3, $4, $5, $6)',
+            [nome, idade, casaHogwarts, habilidade, patrono, sangue]);
 
-        await pool.query('INSERT INTO usuarios (nome, sobrenome, datanascimento, email, idade, signo) VALUES ($1, $2, $3, $4, $5, $6)',
-            [nome, sobrenome, dataNascimento, email, idade, signo]);
-
-        res.status(201).send('Usuário criado com sucesso!');
+        res.status(201).send('Bruxo criado com sucesso!');
     } catch (error) {
-        console.error('Erro ao criar o usuário', error);
-        res.status(500).send('Erro ao criar o usuário');
+        console.error('Erro ao criar o Bruxo', error);
+        res.status(500).send('Erro ao criar o Bruxo');
     }
 });
-
-app.delete('/usuarios/:id', async (req, res) => {
+app.put('/bruxos/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        await pool.query('DELETE FROM usuarios WHERE id = $1', [id]);
-        res.status(201).send({ mensagem: 'Usuário excluído com sucesso' });
+        const { nome, idade, casaHogwarts, habilidade, patrono, sangue } = req.body;
+        
+        await pool.query('UPDATE bruxos SET nome = $1, idade = $2, casaHogwarts = $3, habilidade = $4, patrono = $5, sangue = $6 WHERE id = $7', [nome, idade, casaHogwarts, habilidade, patrono, sangue, id]);
+        res.status(201).send({ mensagem: 'Bruxo atualizado com sucesso!' });
     } catch (error) {
-        console.error('Erro ao excluir usuário:', error);
-        res.status(500).send('Erro ao excluir usuário');
+        console.error('Erro ao atualizar o Bruxo', error);
+        res.status(500).send('Erro ao atualizar o Bruxo');
     }
 });
 
-app.put('/usuarios/:id', async (req, res) => {
+app.delete('/bruxos/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const { nome, sobrenome, datanascimento, email } = req.body;
-
-        const novaDataNascimento = new Date(datanascimento);
-        const idade = calcularIdade(novaDataNascimento);
-        const signo = calcularSigno(novaDataNascimento.getMonth() + 1, novaDataNascimento.getDate());
-
-        await pool.query('UPDATE usuarios SET nome = $1, email = $2, sobrenome = $3, datanascimento = $4, idade = $5, signo = $6 WHERE id = $7', [nome, email, sobrenome, novaDataNascimento, idade, signo, id]);
-        res.status(201).send({ mensagem: 'Usuário atualizado com sucesso!' });
+        await pool.query('DELETE FROM bruxos WHERE id = $1', [id]);
+        res.status(201).send({ mensagem: 'Bruxo excluído com sucesso' });
     } catch (error) {
-        console.error('Erro ao atualizar o usuário', error);
-        res.status(500).send('Erro ao atualizar o usuário');
+        console.error('Erro ao excluir Bruxo:', error);
+        res.status(500).send('Erro ao excluir Bruxo');
     }
 });
 
-app.get('/usuarios/:id', async (req, res) => {
+
+app.get('/bruxos/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const resultado = await pool.query('SELECT * FROM usuarios WHERE id = $1', [id]);
+        const resultado = await pool.query('SELECT * FROM bruxos WHERE id = $1', [id]);
         if (resultado.rowCount === 0) {
-            return res.status(404).send('Usuário não encontrado');
+            return res.status(404).send('Bruxo não encontrado');
         } else {
             res.json({
-                usuario: resultado.rows[0],
+                bruxo: resultado.rows[0],
             });
         }
     } catch (error) {
-        console.error('Erro ao obter o usuário', error);
-        res.status(500).send('Erro ao obter o usuário');
+        console.error('Erro ao obter o Bruxo', error);
+        res.status(500).send('Erro ao obter o Bruxo');
+    }
+});
+
+//Varinhas
+app.get('/varinhas', async (req, res) => {
+    try {
+        const resultado = await pool.query('SELECT * FROM varinhas');
+        res.json({
+            total: resultado.rowCount,
+            varinha: resultado.rows,
+        })
+    } catch (error) {
+        console.error('Erro ao obter todos os varinhas', error);
+        res.status(500).send('Erro ao obter os varinhas');
+    }
+});
+
+app.post('/varinhas', async (req, res) => {
+    try {
+        const { material, comprimento, nucleo, dataFabricacao } = req.body;
+
+        await pool.query('INSERT INTO varinhas (material, comprimento, nucleo, dataFabricacao) VALUES ($1, $2, $3, $4)',
+            [material, comprimento, nucleo, dataFabricacao]);
+
+        res.status(201).send('Varinha criado com sucesso!');
+    } catch (error) {
+        console.error('Erro ao criar o Varinha', error);
+        res.status(500).send('Erro ao criar o Varinha');
+    }
+});
+
+app.put('/varinhas/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { material, comprimento, nucleo, dataFabricacao } = req.body;
+        
+        await pool.query('UPDATE varinhas SET material = $1, comprimento = $2, nucleo = $3, dataFabricacao = $4 WHERE id = $5', [material, comprimento, nucleo, dataFabricacao, id]);
+        res.status(201).send({ mensagem: 'Varinhas atualizado com sucesso!' });
+    } catch (error) {
+        console.error('Erro ao atualizar o Varinhas', error);
+        res.status(500).send('Erro ao atualizar o Varinhas');
+    }
+});
+
+app.delete('/varinhas/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        await pool.query('DELETE FROM varinhas WHERE id = $1', [id]);
+        res.status(201).send({ mensagem: 'Varinha excluído com sucesso' });
+    } catch (error) {
+        console.error('Erro ao excluir Varinha:', error);
+        res.status(500).send('Erro ao excluir Varinha');
+    }
+});
+
+app.get('/varinhas/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const resultado = await pool.query('SELECT * FROM varinhas WHERE id = $1', [id]);
+        if (resultado.rowCount === 0) {
+            return res.status(404).send('Varinha não encontrado');
+        } else {
+            res.json({
+                varinha: resultado.rows[0],
+            });
+        }
+    } catch (error) {
+        console.error('Erro ao obter o Varinha', error);
+        res.status(500).send('Erro ao obter o Varinha');
     }
 });
 
