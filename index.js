@@ -37,7 +37,25 @@ app.get('/bruxos', async (req, res) => {
 
 app.post('/bruxos', async (req, res) => {
     try {
-        const { nome, idade, casaHogwarts, habilidade, patrono, sangue } = req.body;
+        const { nome, idade, habilidade, patrono } = req.body;
+
+        if (idade < 11 || idade > 100) {
+            return res.status(400).send('A idade deve estar entre 11 e 100 anos.');
+        }
+
+        const casaHogwarts = ['Grifinória', 'Sonserina', 'Corvinal', 'Lufa-Lufa'];
+        if (!casaHogwarts) {
+            return res.status(400).send('A casa de Hogwarts é inválida.');
+        }
+
+        if (!patrono || patrono.trim() === '') {
+            return res.status(400).send('É necessário ter um patrono.');
+        }
+
+        const sangue = ['Puro', 'Mestiço', 'Trouxa'];
+        if (!sangue) {
+            return res.status(400).send('O tipo de sangue deve ser puro, mestiço ou trouxa.');
+        }
 
         await pool.query('INSERT INTO bruxos (nome, idade, casaHogwarts, habilidade, patrono, sangue) VALUES ($1, $2, $3, $4, $5, $6)',
             [nome, idade, casaHogwarts, habilidade, patrono, sangue]);
@@ -52,7 +70,7 @@ app.put('/bruxos/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const { nome, idade, casaHogwarts, habilidade, patrono, sangue } = req.body;
-        
+
         await pool.query('UPDATE bruxos SET nome = $1, idade = $2, casaHogwarts = $3, habilidade = $4, patrono = $5, sangue = $6 WHERE id = $7', [nome, idade, casaHogwarts, habilidade, patrono, sangue, id]);
         res.status(201).send({ mensagem: 'Bruxo atualizado com sucesso!' });
     } catch (error) {
@@ -122,7 +140,7 @@ app.put('/varinhas/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const { material, comprimento, nucleo, dataFabricacao } = req.body;
-        
+
         await pool.query('UPDATE varinhas SET material = $1, comprimento = $2, nucleo = $3, dataFabricacao = $4 WHERE id = $5', [material, comprimento, nucleo, dataFabricacao, id]);
         res.status(201).send({ mensagem: 'Varinhas atualizado com sucesso!' });
     } catch (error) {
