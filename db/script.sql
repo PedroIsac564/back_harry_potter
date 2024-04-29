@@ -18,7 +18,7 @@ nucleo VARCHAR(100) NOT NULL,
 dataFabricacao DATE NOT NULL
 );
 
-INSERT INTO bruxos (nome, idade, casaHogwarts, habilidade, patrono) VALUES ('Harry Potter', 20, 'Grifinória', 'Apanhador', 'Cervo', 'puro'); -teste
+INSERT INTO bruxos (nome, idade, casaHogwarts, habilidade, patrono, sangue) VALUES ('Harry Potter', 20, 'Grifinória', 'Apanhador', 'Cervo', 'puro');
 
 
 INSERT INTO varinhas (material, comprimento, nucleo, dataFabricacao) VALUES ('Madeira', 30, 'Fenix', '2021/01/01'); -teste
