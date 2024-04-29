@@ -49,11 +49,7 @@ app.post('/bruxos', async (req, res) => {
             return res.status(400).send('A casa de Hogwarts fornecida não é válida.');
         }
 
-        if (!patrono) {
-            return res.status(400).send('Um bruxo deve ter um patrono.');
-        }
-
-        let tiposSangueValidos = ['puro', 'mestiço', 'trouxa'];
+        let tiposSangueValidos = ['Puro', 'Mestiço', 'Trouxa'];
         if (!tiposSangueValidos.includes(sangue)) {
             return res.status(400).send('O tipo de sangue fornecido não é válido.');
         }
